@@ -1,0 +1,18 @@
+{
+  "name": "fined",
+  "version": "1.0.0",
+  "description": "Assistente de educação financeira via WhatsApp",
+  "main": "index.js",
+  "scripts": {
+    "start": "func start",
+    "test": "echo \"No tests yet\""
+  },
+  "dependencies": {
+    "axios": "^1.6.2",
+    "mssql": "^10.0.1"
+  },
+  "devDependencies": {},
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
