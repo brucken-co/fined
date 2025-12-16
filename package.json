@@ -2,7 +2,7 @@
   "name": "fined",
   "version": "1.0.0",
   "description": "Assistente de educação financeira via WhatsApp",
-  "main": "index.js",
+  "main": "webhook/index.js",
   "scripts": {
     "start": "func start",
     "test": "echo \"No tests yet\""
