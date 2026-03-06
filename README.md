@@ -59,7 +59,7 @@ Tabelas necessárias:
 
 ## 🔗 Webhook URL
 ```
-https://fined-webhook-app.azurewebsites.net/api/webhook
+https://fined-webhook-app-b6cse4etdrbbema9.brazilsouth-01.azurewebsites.net/api/webhook
 ```
 
 ## 📝 Licença

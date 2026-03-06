@@ -13,7 +13,7 @@ module.exports = async function (context, req) {
 
         if (mode === 'subscribe' && token === process.env.VERIFY_TOKEN) {
             context.log('✅ Webhook verificado com sucesso!');
-            context.res = { status: 200, body: parseInt(challenge) };
+            context.res = { status: 200, body: challenge };
         } else {
             context.res = { status: 403, body: 'Forbidden' };
         }
