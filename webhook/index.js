@@ -31,12 +31,12 @@ module.exports = async function (context, req) {
             }
 
             const changes = body.entry[0].changes;
-            
+
             for (const change of changes) {
                 if (change.value.messages) {
                     const message = change.value.messages[0];
                     const clientPhone = message.from;
-                    
+
                     let messageText = '';
                     let buttonResponse = null;
 
@@ -54,10 +54,7 @@ module.exports = async function (context, req) {
                             break;
                     }
 
-                    // Log da mensagem recebida
                     await db.logMessage(clientPhone, 'received', messageText);
-
-                    // Processar mensagem
                     await processMessage(context, clientPhone, messageText, buttonResponse);
                 }
             }
@@ -73,13 +70,11 @@ module.exports = async function (context, req) {
 
 async function processMessage(context, clientPhone, messageText, buttonResponse) {
     try {
-        // 1. Buscar estado atual
         const clientState = await db.getClientState(clientPhone);
         const currentStage = clientState?.current_stage || 'new';
 
         context.log(`📱 ${clientPhone} | Stage: ${currentStage} | Msg: "${messageText}"`);
 
-        // 2. Determinar resposta
         let response;
 
         switch (currentStage) {
@@ -98,22 +93,32 @@ async function processMessage(context, clientPhone, messageText, buttonResponse)
             case 'generating_recommendations':
                 response = await flow.generateRecommendations(clientPhone);
                 break;
+            case 'completed':
+                response = await flow.handleReturnUser(clientPhone);
+                break;
+            case 'awaiting_return_confirmation':
+                response = await flow.handleReturnConfirmation(clientPhone, buttonResponse);
+                break;
+            case 'awaiting_recommendation_type':
+                response = await flow.handleRecommendationType(clientPhone, buttonResponse);
+                break;
             default:
                 response = {
-                    text: "Desculpe, ocorreu um erro. Digite 'reiniciar' para começar novamente.",
+                    text: "Desculpe, ocorreu um erro. Digite qualquer mensagem para recomeçar.",
                     nextStage: 'new'
                 };
         }
 
-        // 3. Enviar resposta
         await whatsapp.sendWhatsAppMessage(clientPhone, response);
-        
-        // Log da mensagem enviada
         await db.logMessage(clientPhone, 'sent', response.text);
 
-        // 4. Atualizar estado
         if (response.nextStage) {
             await db.updateClientState(clientPhone, response.nextStage, response.contextData);
+        }
+
+        // Auto-chain: executa próximo stage automaticamente sem esperar input do usuário
+        if (response.autoChain) {
+            await processMessage(context, clientPhone, '', null);
         }
 
     } catch (error) {

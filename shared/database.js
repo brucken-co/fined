@@ -25,13 +25,14 @@ async function getClientState(phone) {
     const result = await pool.request()
         .input('phone', sql.VarChar, phone)
         .query(`
-            SELECT 
+            SELECT
                 phone_number,
                 current_stage,
                 education_goals,
                 consent_given,
                 consent_timestamp,
                 context_data,
+                last_recommendations,
                 last_interaction
             FROM ClientConversations
             WHERE phone_number = @phone
@@ -89,6 +90,18 @@ async function saveConsent(phone, consentGiven) {
         `);
 }
 
+async function saveRecommendations(phone, recommendations) {
+    const pool = await getPool();
+    await pool.request()
+        .input('phone', sql.VarChar, phone)
+        .input('recommendations', sql.NVarChar, recommendations)
+        .query(`
+            UPDATE ClientConversations
+            SET last_recommendations = @recommendations
+            WHERE phone_number = @phone
+        `);
+}
+
 async function logMessage(phone, messageType, content) {
     const pool = await getPool();
     await pool.request()
@@ -106,5 +119,6 @@ module.exports = {
     updateClientState,
     saveEducationGoals,
     saveConsent,
+    saveRecommendations,
     logMessage
 };
